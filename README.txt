@@ -1,7 +1,11 @@
-MONSTERA SCREENING ROOM — AUTO TITLES
+MONSTERA SCREENING ROOM — DROPDOWN MENU
 
-Upload the new index.html to your Theater-Room GitHub repository and replace the old one.
-Then click Commit changes and wait about one minute.
+This version uses a compact Monstera-themed dropdown menu to save more room for the video player.
 
-Your page:
-https://monsteraessentialsllc-hub.github.io/Theater-Room/
+UPDATE GITHUB
+1. Open the Theater-Room repository.
+2. Click Add file > Upload files.
+3. Upload the new index.html.
+4. Replace the existing index.html.
+5. Click Commit changes.
+6. Wait about one minute, then refresh your theater page.
