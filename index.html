@@ -272,7 +272,7 @@
           <h1>Monstera Screening Room</h1>
         </div>
       </div>
-      <div class="status" id="status">Now playing: Video 1</div>
+      <div class="status" id="status">Now playing: Loading title…</div>
     </header>
 
     <section class="player-shell" aria-label="Video player">
@@ -291,7 +291,7 @@
   </main>
 
   <script>
-    const videos = [{"title": "Video 1", "id": "x19HSLNEN2o", "type": "short"}, {"title": "Video 2", "id": "55Jt9GoQPLY", "type": "video"}, {"title": "Video 3", "id": "VrfWSjgLKAw", "type": "video"}, {"title": "Video 4", "id": "-7IpdRuhAmA", "type": "video"}, {"title": "Video 5", "id": "miOnqxT7kUU", "type": "video"}, {"title": "Video 6", "id": "epsK_YJc55w", "type": "video"}, {"title": "Video 7", "id": "N-LnaEp2YQQ", "type": "video"}];
+    const videos = [{"title": "Loading title…", "fallback": "YouTube Short", "id": "x19HSLNEN2o", "type": "short"}, {"title": "Loading title…", "fallback": "iCarly", "id": "55Jt9GoQPLY", "type": "video"}, {"title": "Loading title…", "fallback": "SantinoVS - TDMN", "id": "VrfWSjgLKAw", "type": "video"}, {"title": "Loading title…", "fallback": "SantinoVS - PAINT SUM (VISUALIZER)", "id": "-7IpdRuhAmA", "type": "video"}, {"title": "Loading title…", "fallback": "YouTube Video 5", "id": "miOnqxT7kUU", "type": "video"}, {"title": "Loading title…", "fallback": "@MidnightSantino x @quiseONMARS - Studio Vlog", "id": "epsK_YJc55w", "type": "video"}, {"title": "Loading title…", "fallback": "YouTube Video 7", "id": "N-LnaEp2YQQ", "type": "video"}];
     const player = document.getElementById("player");
     const playlist = document.getElementById("playlist");
     const status = document.getElementById("status");
@@ -313,19 +313,49 @@
       });
     }
 
-    videos.forEach((video, index) => {
-      const button = document.createElement("button");
-      button.className = "video-btn" + (index === 0 ? " active" : "");
-      button.type = "button";
-      button.innerHTML = `
-        <span class="icon" aria-hidden="true">🍃</span>
-        <span class="label">
-          <strong>${video.title}</strong>
-          <span>${video.type === "short" ? "YouTube Short" : "YouTube video"}</span>
-        </span>`;
-      button.addEventListener("click", () => loadVideo(index, true));
-      playlist.appendChild(button);
-    });
+    function renderPlaylist() {
+      playlist.innerHTML = "";
+      videos.forEach((video, index) => {
+        const button = document.createElement("button");
+        button.className = "video-btn" + (index === 0 ? " active" : "");
+        button.type = "button";
+        button.dataset.index = index;
+        button.innerHTML = `
+          <span class="icon" aria-hidden="true">🍃</span>
+          <span class="label">
+            <strong>${video.title}</strong>
+            <span>${video.type === "short" ? "YouTube Short" : "YouTube video"}</span>
+          </span>`;
+        button.addEventListener("click", () => loadVideo(index, true));
+        playlist.appendChild(button);
+      });
+    }
+
+    async function loadYouTubeTitles() {
+      await Promise.all(videos.map(async (video, index) => {
+        const watchUrl = `https://www.youtube.com/watch?v=${video.id}`;
+        const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(watchUrl)}&format=json`;
+
+        try {
+          const response = await fetch(endpoint);
+          if (!response.ok) throw new Error("Title request failed");
+          const data = await response.json();
+          video.title = data.title || video.fallback;
+        } catch (error) {
+          video.title = video.fallback;
+        }
+
+        const titleElement = document.querySelector(`.video-btn[data-index="${index}"] strong`);
+        if (titleElement) titleElement.textContent = video.title;
+
+        if (index === 0) {
+          status.textContent = `Now playing: ${video.title}`;
+        }
+      }));
+    }
+
+    renderPlaylist();
+    loadYouTubeTitles();
   </script>
 </body>
 </html>
